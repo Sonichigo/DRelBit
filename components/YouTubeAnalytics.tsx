@@ -1,7 +1,7 @@
 
 import React, { useState, useMemo } from 'react';
 import { 
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Cell, ArrowUp, ArrowDown 
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Cell 
 } from 'recharts';
 import { Youtube, TrendingUp, Users, Clock, PlusCircle, Search, Play, MessageSquare } from 'lucide-react';
 import AdvancedFilter from './AdvancedFilter';

@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { NavSection } from '../types';
-import { Bell, Search, Filter, Calendar, LayoutGrid } from 'lucide-react';
+import { Bell, Search, Filter, Calendar, LayoutGrid, Database, Zap, RefreshCw } from 'lucide-react';
 
 interface HeaderProps {
   activeSection: NavSection;
@@ -15,7 +15,7 @@ const Header: React.FC<HeaderProps> = ({ activeSection }) => {
       case NavSection.BRIGHTEDGE: return 'SEO & GSC Intelligence';
       case NavSection.COMPETITORS: return 'Competitive Analysis';
       case NavSection.REPORTS: return 'Custom Reporting Hub';
-      case NavSection.IMPORT: return 'Data Management';
+      case NavSection.IMPORT: return 'Integrations Hub';
       case NavSection.USERS: return 'Access Control';
       default: return 'Dashboard';
     }
@@ -26,13 +26,15 @@ const Header: React.FC<HeaderProps> = ({ activeSection }) => {
       <div className="flex items-center gap-8">
         <h1 className="text-xl font-semibold text-white">{getTitle()}</h1>
         <div className="hidden lg:flex items-center gap-4 border-l border-slate-700 pl-8">
-          <div className="flex items-center gap-2 text-sm text-slate-400 hover:text-white cursor-pointer transition-colors bg-slate-800/50 px-3 py-1.5 rounded-md">
-            <Calendar size={16} />
-            <span>Last 30 Days</span>
-          </div>
-          <div className="flex items-center gap-2 text-sm text-slate-400 hover:text-white cursor-pointer transition-colors bg-slate-800/50 px-3 py-1.5 rounded-md">
-            <Filter size={16} />
-            <span>All Authors</span>
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1.5 px-2 py-1 bg-emerald-500/10 rounded-md border border-emerald-500/20">
+              <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
+              <span className="text-[10px] font-bold text-emerald-500 uppercase tracking-tighter">MongoDB Active</span>
+            </div>
+            <div className="flex items-center gap-1.5 px-2 py-1 bg-blue-500/10 rounded-md border border-blue-500/20">
+              <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+              <span className="text-[10px] font-bold text-blue-500 uppercase tracking-tighter">Postgres Cache</span>
+            </div>
           </div>
         </div>
       </div>
@@ -47,6 +49,9 @@ const Header: React.FC<HeaderProps> = ({ activeSection }) => {
           />
         </div>
         <div className="flex items-center gap-3">
+          <div className="p-2 text-slate-500 border border-slate-800 rounded-lg hover:text-blue-400 cursor-pointer transition-colors" title="Background Sync Status">
+            <RefreshCw size={18} />
+          </div>
           <button className="p-2 text-slate-400 hover:bg-slate-800 rounded-lg relative">
             <Bell size={20} />
             <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-[#0f172a]"></span>
@@ -54,7 +59,6 @@ const Header: React.FC<HeaderProps> = ({ activeSection }) => {
           <button className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors shadow-lg shadow-blue-900/20">
             <LayoutGrid size={18} />
             <span>Widgets</span>
-            <span className="bg-blue-400/30 px-1.5 py-0.5 rounded text-[10px]">15</span>
           </button>
         </div>
       </div>

@@ -2,13 +2,22 @@
 export interface ContentItem {
   id: string;
   date: string;
-  platform: 'GITHUB' | 'REDDIT' | 'LINKEDIN' | 'YOUTUBE' | 'BRIGHTEDGE';
+  platform: 'GITHUB' | 'REDDIT' | 'LINKEDIN' | 'YOUTUBE' | 'BRIGHTEDGE' | 'GSC' | 'GA4';
   type: string;
   author: string;
   description: string;
   impressions: number;
   views: number;
   engagement: number;
+}
+
+export interface Connector {
+  id: string;
+  name: string;
+  provider: 'google' | 'brightedge' | 'github';
+  status: 'connected' | 'disconnected' | 'error';
+  lastSync?: string;
+  icon: string;
 }
 
 export interface YouTubeStats {
@@ -36,6 +45,14 @@ export interface BrightEdgePage {
 export interface User {
   username: string;
   role: 'admin' | 'editor' | 'viewer';
+}
+
+export interface WidgetConfig {
+  id: string;
+  title: string;
+  visible: boolean;
+  order: number;
+  type: 'stat' | 'chart' | 'list' | 'table';
 }
 
 export enum NavSection {

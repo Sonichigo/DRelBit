@@ -11,11 +11,13 @@ import CustomReports from './components/CustomReports';
 import DataImport from './components/DataImport';
 import UserManagement from './components/UserManagement';
 import Login from './components/Login';
+import Signup from './components/Signup';
 
 const App: React.FC = () => {
   const [activeSection, setActiveSection] = useState<NavSection>(NavSection.DASHBOARD);
   const [user, setUser] = useState<User | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isSigningUp, setIsSigningUp] = useState(false);
 
   // Simple authentication persistence
   useEffect(() => {
@@ -30,13 +32,21 @@ const App: React.FC = () => {
     localStorage.setItem('omni_user', JSON.stringify(userData));
   };
 
+  const handleSignup = (userData: User) => {
+    setUser(userData);
+    localStorage.setItem('omni_user', JSON.stringify(userData));
+    setIsSigningUp(false);
+  };
+
   const handleLogout = () => {
     setUser(null);
     localStorage.removeItem('omni_user');
   };
 
   if (!user) {
-    return <Login onLogin={handleLogin} />;
+    return isSigningUp 
+      ? <Signup onSignup={handleSignup} onToggle={() => setIsSigningUp(false)} />
+      : <Login onLogin={handleLogin} onToggle={() => setIsSigningUp(true)} />;
   }
 
   const renderContent = () => {

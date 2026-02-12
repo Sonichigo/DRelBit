@@ -5,9 +5,10 @@ import { Shield, Lock, User as UserIcon, Loader2, Info } from 'lucide-react';
 
 interface LoginProps {
   onLogin: (user: User) => void;
+  onToggle: () => void;
 }
 
-const Login: React.FC<LoginProps> = ({ onLogin }) => {
+const Login: React.FC<LoginProps> = ({ onLogin, onToggle }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -18,14 +19,16 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
     setLoading(true);
     setError('');
 
-    // Simulate salted password verification
-    // In real app, we would send password to backend, backend retrieves salt + hash from MongoDB
-    // and verifies. Here we just mock the delay and logic.
     setTimeout(() => {
-      if (username && password) {
-        onLogin({ username, role: 'admin' });
+      const existingUsers = JSON.parse(localStorage.getItem('omni_users') || '[]');
+      const user = existingUsers.find(
+        (u: any) => u.username.toLowerCase() === username.toLowerCase() && u.password === password
+      );
+
+      if (user) {
+        onLogin({ username: user.username, role: user.role });
       } else {
-        setError('Invalid username or password credentials.');
+        setError('Invalid username or password.');
         setLoading(false);
       }
     }, 1200);
@@ -33,7 +36,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#0f172a] p-6">
-      <div className="w-full max-w-md">
+      <div className="w-full max-w-md animate-in fade-in duration-300">
         <div className="text-center mb-8">
           <div className="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-2xl shadow-blue-900/40">
             <Shield className="text-white" size={32} />
@@ -90,6 +93,15 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
             </button>
           </form>
 
+          <div className="mt-6 text-center">
+            <button 
+              onClick={onToggle}
+              className="text-sm text-slate-400 hover:text-white transition-colors"
+            >
+              Don't have an account? <span className="text-blue-400 font-bold">Sign up</span>
+            </button>
+          </div>
+
           <div className="mt-8 pt-6 border-t border-slate-800">
             <div className="flex items-center gap-2 text-slate-500 text-xs justify-center">
               <Lock size={12} />
@@ -97,10 +109,6 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
             </div>
           </div>
         </div>
-
-        <p className="text-center mt-8 text-slate-500 text-sm">
-          Need access? Contact your workspace administrator.
-        </p>
       </div>
     </div>
   );

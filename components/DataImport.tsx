@@ -1,133 +1,164 @@
 
-import React, { useState } from 'react';
-import { Upload, FileText, CheckCircle2, AlertCircle, X, Loader2 } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { 
+  Cloud, RefreshCw, Link2, Link2Off, CheckCircle2, 
+  AlertCircle, Loader2, Database, Zap, ExternalLink, 
+  ShieldCheck, ArrowRight, Settings
+} from 'lucide-react';
+import { connectorService } from '../services/connectorService';
+import { Connector } from '../types';
 
 const DataImport: React.FC = () => {
-  const [dragActive, setDragActive] = useState(false);
-  const [file, setFile] = useState<File | null>(null);
-  const [status, setStatus] = useState<'idle' | 'uploading' | 'success' | 'error'>('idle');
+  const [connectors, setConnectors] = useState<Connector[]>([]);
+  const [syncingId, setSyncingId] = useState<string | null>(null);
+  const [connectingId, setConnectingId] = useState<string | null>(null);
 
-  const handleDrag = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (e.type === "dragenter" || e.type === "dragover") {
-      setDragActive(true);
-    } else if (e.type === "dragleave") {
-      setDragActive(false);
-    }
+  useEffect(() => {
+    setConnectors(connectorService.getConnectors());
+  }, []);
+
+  const handleConnect = async (id: string) => {
+    setConnectingId(id);
+    await connectorService.connect(id);
+    setConnectors(connectorService.getConnectors());
+    setConnectingId(null);
   };
 
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setDragActive(false);
-    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      setFile(e.dataTransfer.files[0]);
-    }
+  const handleSync = async (id: string) => {
+    setSyncingId(id);
+    await connectorService.syncData(id);
+    setConnectors(connectorService.getConnectors());
+    setSyncingId(null);
   };
 
-  const simulateUpload = () => {
-    setStatus('uploading');
-    setTimeout(() => {
-      setStatus('success');
-      // In a real app, this would send the file to a backend to parse and save to MongoDB
-    }, 2000);
+  const getProviderColor = (provider: string) => {
+    switch(provider) {
+      case 'google': return 'text-blue-500 bg-blue-500/10 border-blue-500/20';
+      case 'brightedge': return 'text-emerald-500 bg-emerald-500/10 border-emerald-500/20';
+      case 'github': return 'text-slate-400 bg-slate-400/10 border-slate-400/20';
+      default: return 'text-slate-400 bg-slate-400/10 border-slate-400/20';
+    }
   };
 
   return (
-    <div className="max-w-2xl mx-auto py-12">
-      <div className="text-center mb-10">
-        <h2 className="text-3xl font-bold mb-2">Import Spreadsheet Data</h2>
-        <p className="text-slate-400">Upload your CSV or XLSX files to sync content metrics from BrightEdge, YouTube, or custom logs.</p>
+    <div className="max-w-5xl mx-auto py-8">
+      <div className="flex items-center justify-between mb-10">
+        <div>
+          <h2 className="text-3xl font-bold mb-2">Integrations Hub</h2>
+          <p className="text-slate-400">Connect directly to source APIs for real-time automated data synchronization.</p>
+        </div>
+        <div className="flex gap-3">
+          <div className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500/10 rounded-full border border-emerald-500/20">
+            <ShieldCheck size={14} className="text-emerald-500" />
+            <span className="text-[10px] font-bold text-emerald-500 uppercase">AES-256 Encrypted</span>
+          </div>
+        </div>
       </div>
 
-      <div className="bg-[#1e293b] border-2 border-dashed border-slate-700 rounded-3xl p-10 flex flex-col items-center justify-center transition-all hover:border-blue-500/50 group">
-        {!file && status === 'idle' && (
-          <label 
-            className={`w-full h-full flex flex-col items-center cursor-pointer ${dragActive ? 'bg-blue-500/5' : ''}`}
-            onDragEnter={handleDrag}
-            onDragLeave={handleDrag}
-            onDragOver={handleDrag}
-            onDrop={handleDrop}
-          >
-            <div className="w-16 h-16 bg-slate-800 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform text-slate-400 group-hover:text-blue-400">
-              <Upload size={32} />
-            </div>
-            <p className="text-lg font-medium mb-1">Click to upload or drag and drop</p>
-            <p className="text-slate-500 text-sm">Supported formats: .csv, .xlsx, .tsv</p>
-            <input type="file" className="hidden" onChange={(e) => e.target.files && setFile(e.target.files[0])} />
-          </label>
-        )}
-
-        {file && status === 'idle' && (
-          <div className="w-full">
-            <div className="flex items-center gap-4 bg-slate-800 p-4 rounded-2xl border border-slate-700 mb-6">
-              <div className="w-12 h-12 bg-blue-500/10 text-blue-500 flex items-center justify-center rounded-xl">
-                <FileText size={24} />
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {connectors.map((connector) => (
+          <div key={connector.id} className="bg-[#1e293b]/50 border border-slate-800 rounded-3xl p-6 hover:border-slate-700 transition-all group">
+            <div className="flex items-start justify-between mb-6">
+              <div className="flex items-center gap-4">
+                <div className={`w-14 h-14 rounded-2xl flex items-center justify-center border ${getProviderColor(connector.provider)}`}>
+                  <Cloud size={28} />
+                </div>
+                <div>
+                  <h3 className="font-bold text-lg">{connector.name}</h3>
+                  <div className="flex items-center gap-2 mt-1">
+                    <span className={`w-2 h-2 rounded-full ${connector.status === 'connected' ? 'bg-emerald-500' : 'bg-slate-600'}`}></span>
+                    <span className="text-xs text-slate-500 font-medium capitalize">{connector.status}</span>
+                  </div>
+                </div>
               </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-bold truncate">{file.name}</p>
-                <p className="text-xs text-slate-500">{(file.size / 1024).toFixed(2)} KB</p>
-              </div>
-              <button onClick={() => setFile(null)} className="p-2 hover:bg-slate-700 rounded-lg text-slate-500">
-                <X size={18} />
+              <button className="p-2 text-slate-600 hover:text-white transition-colors">
+                <Settings size={18} />
               </button>
             </div>
-            <button 
-              onClick={simulateUpload}
-              className="w-full py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl font-bold transition-all shadow-lg shadow-blue-900/20"
-            >
-              Process & Import Data
-            </button>
-          </div>
-        )}
 
-        {status === 'uploading' && (
-          <div className="flex flex-col items-center py-10">
-            <Loader2 size={48} className="text-blue-500 animate-spin mb-4" />
-            <p className="text-lg font-bold">Parsing Data...</p>
-            <p className="text-sm text-slate-400">Validating columns and mapping to database schemas</p>
-          </div>
-        )}
-
-        {status === 'success' && (
-          <div className="flex flex-col items-center py-10 animate-in fade-in zoom-in">
-            <div className="w-16 h-16 bg-emerald-500/20 text-emerald-500 rounded-full flex items-center justify-center mb-4">
-              <CheckCircle2 size={32} />
+            <div className="space-y-4 mb-8">
+              <div className="flex justify-between text-xs">
+                <span className="text-slate-500">Last Successful Sync</span>
+                <span className="text-slate-300 font-mono">
+                  {connector.lastSync ? new Date(connector.lastSync).toLocaleString() : 'Never'}
+                </span>
+              </div>
+              <div className="flex justify-between text-xs">
+                <span className="text-slate-500">API Health</span>
+                <span className="text-emerald-400 font-bold">99.9% Uptime</span>
+              </div>
             </div>
-            <p className="text-xl font-bold text-white mb-2">Sync Completed!</p>
-            <p className="text-sm text-slate-400 mb-8 text-center max-w-xs">1,240 rows were successfully imported into the dashboard content database.</p>
-            <button 
-              onClick={() => {setFile(null); setStatus('idle');}}
-              className="px-6 py-2 bg-slate-800 hover:bg-slate-700 rounded-lg text-sm transition-colors"
-            >
-              Upload Another File
-            </button>
+
+            <div className="flex gap-3">
+              {connector.status === 'connected' ? (
+                <>
+                  <button 
+                    onClick={() => handleSync(connector.id)}
+                    disabled={!!syncingId}
+                    className="flex-1 py-3 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white rounded-xl font-bold transition-all shadow-lg shadow-blue-900/20 flex items-center justify-center gap-2"
+                  >
+                    {syncingId === connector.id ? <RefreshCw size={18} className="animate-spin" /> : <RefreshCw size={18} />}
+                    Sync Now
+                  </button>
+                  <button 
+                    onClick={() => connectorService.disconnect(connector.id).then(() => setConnectors(connectorService.getConnectors()))}
+                    className="px-4 py-3 bg-slate-800 hover:bg-rose-500/10 hover:text-rose-500 text-slate-400 rounded-xl transition-all border border-slate-700"
+                  >
+                    <Link2Off size={18} />
+                  </button>
+                </>
+              ) : (
+                <button 
+                  onClick={() => handleConnect(connector.id)}
+                  disabled={!!connectingId}
+                  className="w-full py-3 bg-slate-800 hover:bg-slate-700 text-white rounded-xl font-bold transition-all border border-slate-700 flex items-center justify-center gap-2"
+                >
+                  {connectingId === connector.id ? <Loader2 size={18} className="animate-spin" /> : <Link2 size={18} />}
+                  Connect Plugin
+                </button>
+              )}
+            </div>
           </div>
-        )}
+        ))}
+
+        {/* Manual Import Utility */}
+        <div className="md:col-span-2 mt-8 p-8 bg-slate-900/30 border border-dashed border-slate-800 rounded-3xl flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <div className="p-3 bg-slate-800 rounded-xl text-slate-500">
+              <Database size={24} />
+            </div>
+            <div>
+              <h4 className="font-bold">Legacy CSV Import</h4>
+              <p className="text-sm text-slate-500">Still using spreadsheets? Upload manually to the staging area.</p>
+            </div>
+          </div>
+          <button className="flex items-center gap-2 px-6 py-2.5 bg-slate-800 hover:bg-slate-700 text-sm font-bold rounded-xl transition-all border border-slate-700">
+            Open Staging <ArrowRight size={16} />
+          </button>
+        </div>
       </div>
 
-      <div className="mt-12 grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="p-6 bg-[#1e293b]/50 border border-slate-800 rounded-2xl">
-          <h4 className="font-bold mb-4 flex items-center gap-2">
-            <AlertCircle size={18} className="text-blue-400" />
-            Import Mapping
-          </h4>
-          <ul className="space-y-3 text-sm text-slate-400">
-            <li className="flex justify-between"><span>Column A</span> <span className="text-white font-mono">Platform</span></li>
-            <li className="flex justify-between"><span>Column B</span> <span className="text-white font-mono">Impressions</span></li>
-            <li className="flex justify-between"><span>Column C</span> <span className="text-white font-mono">Views</span></li>
-            <li className="flex justify-between"><span>Column D</span> <span className="text-white font-mono">Author</span></li>
-          </ul>
-        </div>
-        <div className="p-6 bg-[#1e293b]/50 border border-slate-800 rounded-2xl">
-          <h4 className="font-bold mb-4">Integrations Available</h4>
-          <div className="flex flex-wrap gap-2">
-            <span className="px-3 py-1 bg-slate-800 rounded-full text-xs text-slate-300 border border-slate-700">Google Search Console</span>
-            <span className="px-3 py-1 bg-slate-800 rounded-full text-xs text-slate-300 border border-slate-700">BrightEdge Data Cube</span>
-            <span className="px-3 py-1 bg-slate-800 rounded-full text-xs text-slate-300 border border-slate-700">YouTube API</span>
-            <span className="px-3 py-1 bg-slate-800 rounded-full text-xs text-slate-300 border border-slate-700">LinkedIn Analytics</span>
+      <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="space-y-4">
+          <div className="w-10 h-10 bg-blue-500/10 text-blue-500 rounded-xl flex items-center justify-center">
+            <Zap size={20} />
           </div>
+          <h4 className="font-bold">Real-time Webhooks</h4>
+          <p className="text-xs text-slate-400 leading-relaxed">Incoming data is processed via serverless functions and normalized before hitting MongoDB.</p>
+        </div>
+        <div className="space-y-4">
+          <div className="w-10 h-10 bg-emerald-500/10 text-emerald-500 rounded-xl flex items-center justify-center">
+            <ShieldCheck size={20} />
+          </div>
+          <h4 className="font-bold">Secure Scopes</h4>
+          <p className="text-xs text-slate-400 leading-relaxed">We only request read-only access to your Search Console and Analytics data. Your secrets are never stored.</p>
+        </div>
+        <div className="space-y-4">
+          <div className="w-10 h-10 bg-amber-500/10 text-amber-500 rounded-xl flex items-center justify-center">
+            <RefreshCw size={20} />
+          </div>
+          <h4 className="font-bold">Auto-Invalidation</h4>
+          <p className="text-xs text-slate-400 leading-relaxed">The PostgreSQL cache is automatically flushed whenever a plugin detects a significant data shift.</p>
         </div>
       </div>
     </div>
