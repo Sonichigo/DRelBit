@@ -20,39 +20,19 @@ export interface Connector {
   icon: string;
 }
 
-export interface YouTubeStats {
-  channelId: string;
-  channelName: string;
-  totalViews: number;
-  subscribers: number;
-  avgWatchTime: number;
-  engagementRate: number;
-  competitorId?: string;
+export interface DatabaseConfig {
+  id: 'mongodb' | 'postgresql';
+  name: string;
+  connectionString: string;
+  status: 'online' | 'offline' | 'configuring';
+  latency: number;
+  cluster: string;
 }
 
-export interface BrightEdgePage {
-  url: string;
-  rank: number;
-  keywords: number;
-  traffic: number;
-  gscImpressions: number;
-  ctr: number;
-  value: number;
-  group: string;
-  status: 'Optimal' | 'Rising' | 'Stable' | 'Alert';
-}
-
-export interface User {
-  username: string;
-  role: 'admin' | 'editor' | 'viewer';
-}
-
-export interface WidgetConfig {
-  id: string;
-  title: string;
-  visible: boolean;
-  order: number;
-  type: 'stat' | 'chart' | 'list' | 'table';
+export interface ConnectionLog {
+  timestamp: string;
+  message: string;
+  type: 'info' | 'success' | 'error';
 }
 
 export enum NavSection {
@@ -66,6 +46,14 @@ export enum NavSection {
   USERS = 'users'
 }
 
+export interface WidgetConfig {
+  id: string;
+  title: string;
+  visible: boolean;
+  order: number;
+  type: 'stat' | 'chart' | 'list' | 'table';
+}
+
 export type FilterOperator = 'contains' | 'equals' | 'greaterThan' | 'lessThan' | 'between';
 
 export interface FilterRule {
@@ -73,10 +61,39 @@ export interface FilterRule {
   field: string;
   operator: FilterOperator;
   value: any;
-  valueEnd?: any; // For between operator
+  valueEnd?: any;
 }
 
 export interface SortConfig {
   field: string;
   direction: 'asc' | 'desc';
+}
+
+export interface User {
+  username: string;
+  role: 'admin' | 'editor' | 'viewer';
+}
+
+// Added YouTubeStats interface to fix import error in YouTubeAnalytics.tsx
+export interface YouTubeStats {
+  id: string;
+  title: string;
+  views: number;
+  engagementRate: number;
+  date: string;
+  duration: number;
+  category: string;
+}
+
+// Added BrightEdgePage interface to fix import error in BrightEdgeAnalytics.tsx
+export interface BrightEdgePage {
+  url: string;
+  rank: number;
+  keywords: number;
+  traffic: number;
+  gscImpressions: number;
+  ctr: number;
+  value: number;
+  group: string;
+  status: 'Optimal' | 'Rising' | 'Stable' | 'Alert' | string;
 }

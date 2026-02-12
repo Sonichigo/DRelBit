@@ -7,7 +7,8 @@ import { Youtube, TrendingUp, Users, Clock, PlusCircle, Search, Play, MessageSqu
 import AdvancedFilter from './AdvancedFilter';
 import { YouTubeStats, FilterRule, SortConfig } from '../types';
 
-const MOCK_VIDEOS = [
+// Explicitly typed using YouTubeStats from types.ts
+const MOCK_VIDEOS: YouTubeStats[] = [
   { id: 'v1', title: 'NextJS 15 Auth Patterns', views: 42000, engagementRate: 8.5, date: '2025-01-20', duration: 1200, category: 'Technical' },
   { id: 'v2', title: 'Mastering Gemini 2.5 API', views: 85000, engagementRate: 12.4, date: '2025-01-25', duration: 1800, category: 'AI' },
   { id: 'v3', title: 'Rust for JS Developers', views: 25000, engagementRate: 4.5, date: '2025-01-15', duration: 900, category: 'Technical' },
