@@ -32,7 +32,8 @@ class ConnectorService {
     localStorage.setItem(this.storageKey, JSON.stringify(updated));
   }
 
-  async syncData(id: string): Promise<void> {
+  // Fix: Added projectId parameter to satisfy ContentItem interface requirements during sync
+  async syncData(id: string, projectId: string): Promise<void> {
     const connector = this.getConnectors().find(c => c.id === id);
     if (!connector || connector.status !== 'connected') return;
 
@@ -41,11 +42,13 @@ class ConnectorService {
     await new Promise(r => setTimeout(r, 3000));
 
     // Mock incoming data from API
+    // Fix: Added missing projectId to satisfy ContentItem interface and correctly link data to the active workspace
     const apiData: ContentItem[] = [
       { 
         id: `api-${Date.now()}`, 
+        projectId,
         date: new Date().toISOString().split('T')[0], 
-        platform: id.includes('gsc') ? 'GSC' : 'GA4', 
+        platform: (id.includes('gsc') ? 'GSC' : 'GA4') as 'GSC' | 'GA4', 
         type: 'API_FETCH', 
         author: 'System Bot', 
         description: `Automated sync from ${connector.name}`, 

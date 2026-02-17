@@ -1,8 +1,9 @@
 
 export interface ContentItem {
   id: string;
+  projectId: string;
   date: string;
-  platform: 'GITHUB' | 'REDDIT' | 'LINKEDIN' | 'YOUTUBE' | 'BRIGHTEDGE' | 'GSC' | 'GA4';
+  platform: 'GITHUB' | 'REDDIT' | 'LINKEDIN' | 'YOUTUBE' | 'BRIGHTEDGE' | 'GSC' | 'GA4' | 'SEO';
   type: string;
   author: string;
   description: string;
@@ -11,28 +12,21 @@ export interface ContentItem {
   engagement: number;
 }
 
-export interface Connector {
+export interface Report {
+  id: string;
+  projectId: string;
+  title: string;
+  type: string;
+  createdAt: string;
+  sources: string[];
+  metrics: string[];
+}
+
+export interface Project {
   id: string;
   name: string;
-  provider: 'google' | 'brightedge' | 'github';
-  status: 'connected' | 'disconnected' | 'error';
-  lastSync?: string;
-  icon: string;
-}
-
-export interface DatabaseConfig {
-  id: 'mongodb' | 'postgresql';
-  name: string;
-  connectionString: string;
-  status: 'online' | 'offline' | 'configuring';
-  latency: number;
-  cluster: string;
-}
-
-export interface ConnectionLog {
-  timestamp: string;
-  message: string;
-  type: 'info' | 'success' | 'error';
+  description: string;
+  createdAt: string;
 }
 
 export enum NavSection {
@@ -43,16 +37,22 @@ export enum NavSection {
   COMPETITORS = 'competitors',
   REPORTS = 'reports',
   IMPORT = 'import',
-  USERS = 'users'
+  USERS = 'users',
+  PROJECTS = 'projects',
+  SYSTEM_HEALTH = 'system_health'
 }
 
-export interface WidgetConfig {
-  id: string;
-  title: string;
-  visible: boolean;
-  order: number;
-  type: 'stat' | 'chart' | 'list' | 'table';
+export interface User {
+  username: string;
+  role: 'super_admin' | 'admin' | 'editor' | 'viewer';
 }
+
+/**
+ * Added missing types to fix compilation errors in:
+ * - components/AdvancedFilter.tsx
+ * - services/databaseService.ts
+ * - services/connectorService.ts
+ */
 
 export type FilterOperator = 'contains' | 'equals' | 'greaterThan' | 'lessThan' | 'between';
 
@@ -60,40 +60,22 @@ export interface FilterRule {
   id: string;
   field: string;
   operator: FilterOperator;
-  value: any;
-  valueEnd?: any;
+  value: string;
+  valueEnd?: string;
 }
 
-export interface SortConfig {
-  field: string;
-  direction: 'asc' | 'desc';
-}
-
-export interface User {
-  username: string;
-  role: 'admin' | 'editor' | 'viewer';
-}
-
-// Added YouTubeStats interface to fix import error in YouTubeAnalytics.tsx
-export interface YouTubeStats {
+export interface Connector {
   id: string;
-  title: string;
-  views: number;
-  engagementRate: number;
-  date: string;
-  duration: number;
-  category: string;
+  name: string;
+  provider: string;
+  status: 'connected' | 'disconnected';
+  icon: string;
+  lastSync?: string;
 }
 
-// Added BrightEdgePage interface to fix import error in BrightEdgeAnalytics.tsx
-export interface BrightEdgePage {
-  url: string;
-  rank: number;
-  keywords: number;
-  traffic: number;
-  gscImpressions: number;
-  ctr: number;
-  value: number;
-  group: string;
-  status: 'Optimal' | 'Rising' | 'Stable' | 'Alert' | string;
+export interface ConnectionLog {
+  id: string;
+  timestamp: string;
+  message: string;
+  type: 'success' | 'info' | 'warn' | 'error';
 }

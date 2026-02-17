@@ -4,29 +4,61 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>OmniContent Dashboard Pro</title>
+    <title>Content Dashboard Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+      // Configure Tailwind CDN to handle our custom theme and animations
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Inter', 'sans-serif'],
+            },
+            colors: {
+              slate: {
+                950: '#020617',
+              }
+            },
+            animation: {
+              'shake': 'shake 0.2s ease-in-out 0s 2',
+            },
+            keyframes: {
+              shake: {
+                '0%, 100%': { transform: 'translateX(0)' },
+                '25%': { transform: 'translateX(-4px)' },
+                '75%': { transform: 'translateX(4px)' },
+              }
+            }
+          }
+        }
+      }
+    </script>
+    <style type="text/tailwind">
+      @layer base {
+        body {
+          @apply bg-[#0f172a] text-[#f1f5f9] antialiased;
+        }
+      }
+      @layer components {
+        .custom-scrollbar::-webkit-scrollbar {
+          @apply w-2 h-2;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+          @apply bg-[#1e293b];
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+          @apply bg-[#334155] rounded-full hover:bg-[#475569];
+        }
+      }
+    </style>
     <style>
+      /* Fallback styles to prevent a white flash before Tailwind loads */
       body {
-        font-family: 'Inter', sans-serif;
         background-color: #0f172a;
         color: #f1f5f9;
         margin: 0;
-      }
-      ::-webkit-scrollbar {
-        width: 8px;
-        height: 8px;
-      }
-      ::-webkit-scrollbar-track {
-        background: #1e293b;
-      }
-      ::-webkit-scrollbar-thumb {
-        background: #334155;
-        border-radius: 4px;
-      }
-      ::-webkit-scrollbar-thumb:hover {
-        background: #475569;
+        font-family: 'Inter', sans-serif;
       }
     </style>
   <script type="importmap">
@@ -37,14 +69,21 @@
     "react-dom": "https://esm.sh/react-dom@^19.2.4",
     "react-dom/": "https://esm.sh/react-dom@^19.2.4/",
     "recharts": "https://esm.sh/recharts@^3.7.0",
-    "lucide-react": "https://esm.sh/lucide-react@^0.563.0"
+    "lucide-react": "https://esm.sh/lucide-react@^0.563.0",
+    "cors": "https://esm.sh/cors@^2.8.6",
+    "express": "https://esm.sh/express@^5.2.1",
+    "mongodb": "https://esm.sh/mongodb@^7.1.0",
+    "bcryptjs": "https://esm.sh/bcryptjs@^3.0.3",
+    "dotenv": "https://esm.sh/dotenv@^17.2.4",
+    "next": "https://esm.sh/next@^16.1.6",
+    "next/": "https://esm.sh/next@^16.1.6/",
+    "@jest/globals": "https://esm.sh/@jest/globals@^30.2.0"
   }
 }
 </script>
 </head>
   <body>
     <div id="root"></div>
-    <!-- Entry point for the application -->
     <script type="module" src="./index.tsx"></script>
   </body>
 </html>
