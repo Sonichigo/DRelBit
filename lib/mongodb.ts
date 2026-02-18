@@ -57,7 +57,7 @@ export default clientPromise;
 export async function getDb() {
   try {
     const client = await clientPromise;
-    return client.db('Content_pro');
+    return client.db('omnicontent_pro');
   } catch (e) {
     console.error("DEBUG [MongoDB]: Could not acquire database handle.", e);
     throw new Error("DATABASE_UNAVAILABLE");

@@ -24,14 +24,34 @@ export async function POST(request: Request) {
     const db = await getDb();
     const content = db.collection('content');
     
-    if (Array.isArray(items)) {
-      await content.insertMany(items);
-    } else {
-      await content.insertOne(items);
-    }
+    const itemsArray = Array.isArray(items) ? items : [items];
     
-    return NextResponse.json({ success: true });
+    if (itemsArray.length === 0) {
+      return NextResponse.json({ success: true, count: 0 });
+    }
+
+    // Use bulkWrite to perform upserts based on projectId and description (URL)
+    // This prevents duplicate entries for the same page/URL in the same project
+    const operations = itemsArray.map((item) => ({
+      updateOne: {
+        filter: { 
+          projectId: item.projectId, 
+          description: item.description 
+        },
+        update: { $set: item },
+        upsert: true
+      }
+    }));
+
+    const result = await content.bulkWrite(operations);
+    
+    return NextResponse.json({ 
+      success: true, 
+      upsertedCount: result.upsertedCount, 
+      modifiedCount: result.modifiedCount 
+    });
   } catch (error) {
+    console.error("Content Upload Error:", error);
     return NextResponse.json({ error: "Upload content failed" }, { status: 500 });
   }
 }

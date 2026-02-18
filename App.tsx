@@ -19,9 +19,16 @@ import Signup from './components/Signup';
 import { api } from './services/apiService';
 import { DatabaseZap, AlertTriangle, RefreshCw } from 'lucide-react';
 
-// --- Error Boundary Component ---
-class ErrorBoundary extends Component<{ children: ReactNode }, { hasError: boolean }> {
-  constructor(props: { children: ReactNode }) {
+interface ErrorBoundaryProps {
+  children?: ReactNode;
+}
+
+interface ErrorBoundaryState {
+  hasError: boolean;
+}
+
+class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
+  constructor(props: ErrorBoundaryProps) {
     super(props);
     this.state = { hasError: false };
   }
@@ -42,7 +49,7 @@ class ErrorBoundary extends Component<{ children: ReactNode }, { hasError: boole
             <AlertTriangle size={40} />
           </div>
           <h1 className="text-2xl font-bold text-white mb-2">Workspace Failure</h1>
-          <p className="text-slate-400 max-w-md mb-8">The dashboard encountered a critical rendering error. Your data in the local vault remains safe.</p>
+          <p className="text-slate-400 max-w-md mb-8">The dashboard encountered a critical rendering error.</p>
           <button 
             onClick={() => window.location.reload()}
             className="flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold transition-all"
@@ -65,24 +72,22 @@ export default function Home() {
   const [isSigningUp, setIsSigningUp] = useState(false);
   const [initLoading, setInitLoading] = useState(true);
   const [connectionStatus, setConnectionStatus] = useState<'online' | 'offline' | 'checking'>('checking');
+  
+  // Hoisted state for communication between Header and Content
+  const [isWidgetGalleryOpen, setIsWidgetGalleryOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
 
   const initializeApp = useCallback(async () => {
     setInitLoading(true);
-    
     const savedUser = localStorage.getItem('omni_user');
-    if (savedUser) {
-      setUser(JSON.parse(savedUser));
-    }
+    if (savedUser) setUser(JSON.parse(savedUser));
 
     try {
       const isOnline = await api.ping();
       setConnectionStatus(isOnline ? 'online' : 'offline');
-      
       const data = await api.getProjects();
       setProjects(data || []);
-      if (data && data.length > 0) {
-        setActiveProject(data[0]);
-      }
+      if (data && data.length > 0) setActiveProject(data[0]);
     } catch (err) {
       setConnectionStatus('offline');
       const localData = await api.getProjects();
@@ -93,9 +98,7 @@ export default function Home() {
     }
   }, []);
 
-  useEffect(() => {
-    initializeApp();
-  }, [initializeApp]);
+  useEffect(() => { initializeApp(); }, [initializeApp]);
 
   const handleLogin = (userData: User) => {
     setUser(userData);
@@ -130,9 +133,7 @@ export default function Home() {
         <div className="w-16 h-16 bg-blue-600 rounded-3xl flex items-center justify-center shadow-2xl shadow-blue-900/40 animate-bounce">
           <span className="text-white font-black text-2xl">O</span>
         </div>
-        <div className="text-slate-500 font-bold uppercase tracking-[0.3em] text-[10px] animate-pulse">
-          Initializing Omni Vault...
-        </div>
+        <div className="text-slate-500 font-bold uppercase tracking-[0.3em] text-[10px] animate-pulse">Initializing Omni Vault...</div>
       </div>
     );
   }
@@ -145,7 +146,13 @@ export default function Home() {
 
   const renderContent = () => {
     switch (activeSection) {
-      case NavSection.DASHBOARD: return <Dashboard project={activeProject} />;
+      case NavSection.DASHBOARD: 
+        return <Dashboard 
+          project={activeProject} 
+          isWidgetGalleryOpen={isWidgetGalleryOpen} 
+          setIsWidgetGalleryOpen={setIsWidgetGalleryOpen}
+          searchQuery={searchQuery}
+        />;
       case NavSection.YOUTUBE: return <YouTubeAnalytics project={activeProject} />;
       case NavSection.BRIGHTEDGE: return <BrightEdgeAnalytics project={activeProject} />;
       case NavSection.COMPETITORS: return <CompetitorTracking />;
@@ -154,7 +161,7 @@ export default function Home() {
       case NavSection.USERS: return <UserManagement />;
       case NavSection.PROJECTS: return <ProjectManagement projects={projects} onAddProject={handleAddProject} />;
       case NavSection.SYSTEM_HEALTH: return <SystemHealth />;
-      default: return <Dashboard project={activeProject} />;
+      default: return <Dashboard project={activeProject} isWidgetGalleryOpen={isWidgetGalleryOpen} setIsWidgetGalleryOpen={setIsWidgetGalleryOpen} searchQuery={searchQuery} />;
     }
   };
 
@@ -173,16 +180,23 @@ export default function Home() {
           onSelectProject={setActiveProject}
         />
         <div className="flex-1 flex flex-col min-w-0">
-          <Header activeSection={activeSection} activeProject={activeProject} />
-          <main className="flex-1 overflow-y-auto p-6 scroll-smooth">
+          <Header 
+            activeSection={activeSection} 
+            activeProject={activeProject} 
+            onOpenWidgets={() => setIsWidgetGalleryOpen(true)}
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
+            onRefresh={initializeApp}
+          />
+          <main className="flex-1 overflow-y-auto p-6 scroll-smooth custom-scrollbar">
             <div className="max-w-[1600px] mx-auto space-y-8">
               {connectionStatus === 'offline' && (
-                <div className="bg-amber-500/10 border border-amber-500/20 p-4 rounded-2xl flex items-center justify-between animate-in slide-in-from-top-4">
+                <div className="bg-amber-500/10 border border-amber-500/20 p-4 rounded-2xl flex items-center justify-between">
                   <div className="flex items-center gap-3 text-amber-500">
                     <DatabaseZap size={20} />
-                    <span className="text-sm font-medium">Server Offline: Using Secured Local Workspace (IndexedDB)</span>
+                    <span className="text-sm font-medium">Server Offline: Using Secured Local Workspace</span>
                   </div>
-                  <button onClick={initializeApp} className="text-xs font-bold text-amber-500 hover:underline uppercase tracking-widest">Retry Cloud Sync</button>
+                  <button onClick={initializeApp} className="text-xs font-bold text-amber-500 hover:underline uppercase tracking-widest">Retry Sync</button>
                 </div>
               )}
               {renderContent()}

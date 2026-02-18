@@ -21,15 +21,20 @@
       "static/chunks/main-app.js",
       "static/chunks/app/api/content/route.js"
     ],
-    "/api/auth/login/route": [
+    "/api/scrape/route": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/api/auth/login/route.js"
+      "static/chunks/app/api/scrape/route.js"
     ],
-    "/_not-found/page": [
+    "/api/projects/[id]/route": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/_not-found/page.js"
+      "static/chunks/app/api/projects/[id]/route.js"
+    ],
+    "/api/reports/route": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/api/reports/route.js"
     ]
   }
 }

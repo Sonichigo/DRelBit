@@ -3,13 +3,24 @@ export interface ContentItem {
   id: string;
   projectId: string;
   date: string;
-  platform: 'GITHUB' | 'REDDIT' | 'LINKEDIN' | 'YOUTUBE' | 'BRIGHTEDGE' | 'GSC' | 'GA4' | 'SEO';
+  platform: 'GITHUB' | 'REDDIT' | 'LINKEDIN' | 'YOUTUBE' | 'BRIGHTEDGE' | 'GSC' | 'GA4' | 'SEO' | 'BLOG';
   type: string;
   author: string;
   description: string;
   impressions: number;
   views: number;
   engagement: number;
+  url?: string;
+  events?: string[];
+  communities?: string[];
+}
+
+export interface Project {
+  id: string;
+  name: string;
+  description: string;
+  createdAt: string;
+  spreadsheetUrl?: string;
 }
 
 export interface Report {
@@ -22,38 +33,42 @@ export interface Report {
   metrics: string[];
 }
 
-export interface Project {
+export interface CFP {
+  id: string;
+  projectId: string;
+  eventName: string;
+  type: string;
+  deadline: string;
+  status: 'OPEN' | 'CLOSED';
+}
+
+export interface TrackedUrl {
+  id: string;
+  projectId: string;
+  url: string;
+  label: string;
+  lastScraped?: string;
+}
+
+// Added Session interface to support apiService and databaseService
+export interface Session {
+  id: string;
+  projectId: string;
+  title: string;
+  date: string;
+}
+
+// Added Connector interface to support connectorService
+export interface Connector {
   id: string;
   name: string;
-  description: string;
-  createdAt: string;
+  provider: string;
+  status: 'connected' | 'disconnected';
+  icon: string;
+  lastSync?: string;
 }
 
-export enum NavSection {
-  DASHBOARD = 'dashboard',
-  CONTENT = 'content',
-  YOUTUBE = 'youtube',
-  BRIGHTEDGE = 'brightedge',
-  COMPETITORS = 'competitors',
-  REPORTS = 'reports',
-  IMPORT = 'import',
-  USERS = 'users',
-  PROJECTS = 'projects',
-  SYSTEM_HEALTH = 'system_health'
-}
-
-export interface User {
-  username: string;
-  role: 'super_admin' | 'admin' | 'editor' | 'viewer';
-}
-
-/**
- * Added missing types to fix compilation errors in:
- * - components/AdvancedFilter.tsx
- * - services/databaseService.ts
- * - services/connectorService.ts
- */
-
+// Added Filter types to support AdvancedFilter component
 export type FilterOperator = 'contains' | 'equals' | 'greaterThan' | 'lessThan' | 'between';
 
 export interface FilterRule {
@@ -64,18 +79,28 @@ export interface FilterRule {
   valueEnd?: string;
 }
 
-export interface Connector {
-  id: string;
-  name: string;
-  provider: string;
-  status: 'connected' | 'disconnected';
-  icon: string;
-  lastSync?: string;
+export enum NavSection {
+  DASHBOARD = 'dashboard',
+  YOUTUBE = 'youtube',
+  BRIGHTEDGE = 'brightedge',
+  COMPETITORS = 'competitors',
+  REPORTS = 'reports',
+  IMPORT = 'import',
+  USERS = 'users',
+  PROJECTS = 'projects',
+  SYSTEM_HEALTH = 'system_health',
+  // Added missing enum values used in constants.tsx
+  CONTENT = 'content',
+  NEEDS_UPDATE = 'needs_update',
+  EVENTS = 'events',
+  PRESENTATIONS = 'presentations',
+  SESSIONS = 'sessions',
+  JIRA = 'jira',
+  CONFLUENCE = 'confluence',
+  SYSTEM_STATS = 'system_stats'
 }
 
-export interface ConnectionLog {
-  id: string;
-  timestamp: string;
-  message: string;
-  type: 'success' | 'info' | 'warn' | 'error';
+export interface User {
+  username: string;
+  role: 'super_admin' | 'admin' | 'editor' | 'viewer';
 }

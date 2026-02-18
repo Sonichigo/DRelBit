@@ -4,10 +4,10 @@ import { Shield, ShieldCheck, ShieldAlert, Mail, MoreVertical, Plus } from 'luci
 
 const UserManagement: React.FC = () => {
   const users = [
-    { name: 'Admin User', email: 'admin@Content.pro', role: 'Super Admin', status: 'Active', lastLogin: '10 mins ago' },
-    { name: 'Ricardo Ferreira', email: 'ricardo@Content.pro', role: 'Editor', status: 'Active', lastLogin: '2 hours ago' },
-    { name: 'Guy Royse', email: 'guy@Content.pro', role: 'Viewer', status: 'Offline', lastLogin: '1 day ago' },
-    { name: 'Bhavana Giri', email: 'bhavana@Content.pro', role: 'Editor', status: 'Active', lastLogin: '5 mins ago' },
+    { name: 'Admin User', email: 'admin@omnicontent.pro', role: 'Super Admin', status: 'Active', lastLogin: '10 mins ago' },
+    { name: 'Ricardo Ferreira', email: 'ricardo@omnicontent.pro', role: 'Editor', status: 'Active', lastLogin: '2 hours ago' },
+    { name: 'Guy Royse', email: 'guy@omnicontent.pro', role: 'Viewer', status: 'Offline', lastLogin: '1 day ago' },
+    { name: 'Bhavana Giri', email: 'bhavana@omnicontent.pro', role: 'Editor', status: 'Active', lastLogin: '5 mins ago' },
   ];
 
   return (

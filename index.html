@@ -4,7 +4,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Content Dashboard Pro</title>
+    <title>OmniContent Dashboard Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script>
@@ -77,13 +77,17 @@
     "dotenv": "https://esm.sh/dotenv@^17.2.4",
     "next": "https://esm.sh/next@^16.1.6",
     "next/": "https://esm.sh/next@^16.1.6/",
-    "@jest/globals": "https://esm.sh/@jest/globals@^30.2.0"
+    "@jest/globals": "https://esm.sh/@jest/globals@^30.2.0",
+    "xlsx": "https://esm.sh/xlsx@^0.18.5",
+    "@google/genai": "https://esm.sh/@google/genai@^1.41.0"
   }
 }
 </script>
+<link rel="stylesheet" href="/index.css">
 </head>
   <body>
     <div id="root"></div>
     <script type="module" src="./index.tsx"></script>
-  </body>
+  <script type="module" src="/index.tsx"></script>
+</body>
 </html>

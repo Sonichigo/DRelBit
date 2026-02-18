@@ -17,7 +17,7 @@ import SystemHealth from '../components/SystemHealth';
 import Login from '../components/Login';
 import Signup from '../components/Signup';
 import { api } from '../services/apiService';
-import { DatabaseZap } from 'lucide-react';
+import { DatabaseZap, Wifi, WifiOff } from 'lucide-react';
 
 export default function Home() {
   const [activeSection, setActiveSection] = useState<NavSection>(NavSection.DASHBOARD);
@@ -28,6 +28,11 @@ export default function Home() {
   const [isSigningUp, setIsSigningUp] = useState(false);
   const [initLoading, setInitLoading] = useState(true);
   const [connectionStatus, setConnectionStatus] = useState<'online' | 'offline' | 'checking'>('checking');
+  const [syncMessage, setSyncMessage] = useState<string | null>(null);
+  
+  // Added state to synchronize between Header and Dashboard components
+  const [isWidgetGalleryOpen, setIsWidgetGalleryOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
 
   const initializeApp = useCallback(async () => {
     setInitLoading(true);
@@ -38,17 +43,31 @@ export default function Home() {
     }
 
     try {
+      const isOnline = await api.ping();
+      setConnectionStatus(isOnline ? 'online' : 'offline');
+
+      if (isOnline) {
+        // Attempt background sync of local changes
+        try {
+          const syncResult = await api.syncUnsyncedData();
+          if (syncResult.processedCount > 0) {
+            setSyncMessage(`Synced ${syncResult.processedCount} items to cloud.`);
+            setTimeout(() => setSyncMessage(null), 5000);
+          }
+        } catch (err) {
+          console.warn("Background sync failed, will retry later.");
+        }
+      }
+      
       const data = await api.getProjects();
       setProjects(data || []);
       if (data && data.length > 0) {
-        // If current active project is gone, reset to first
         if (!activeProject || !data.find(p => p.id === activeProject.id)) {
           setActiveProject(data[0]);
         }
       } else {
         setActiveProject(null);
       }
-      setConnectionStatus('online');
     } catch (err) {
       console.warn("Operating in Local Vault mode.");
       setConnectionStatus('offline');
@@ -112,7 +131,13 @@ export default function Home() {
 
   const renderContent = () => {
     switch (activeSection) {
-      case NavSection.DASHBOARD: return <Dashboard project={activeProject} />;
+      // Fixed: Passed required props to Dashboard component
+      case NavSection.DASHBOARD: return <Dashboard 
+        project={activeProject} 
+        isWidgetGalleryOpen={isWidgetGalleryOpen} 
+        setIsWidgetGalleryOpen={setIsWidgetGalleryOpen}
+        searchQuery={searchQuery}
+      />;
       case NavSection.YOUTUBE: return <YouTubeAnalytics project={activeProject} />;
       case NavSection.BRIGHTEDGE: return <BrightEdgeAnalytics project={activeProject} />;
       case NavSection.COMPETITORS: return <CompetitorTracking />;
@@ -121,7 +146,13 @@ export default function Home() {
       case NavSection.USERS: return <UserManagement />;
       case NavSection.PROJECTS: return <ProjectManagement projects={projects} onAddProject={handleAddProject} onRefresh={initializeApp} />;
       case NavSection.SYSTEM_HEALTH: return <SystemHealth />;
-      default: return <Dashboard project={activeProject} />;
+      // Fixed: Passed required props to Dashboard component in default case
+      default: return <Dashboard 
+        project={activeProject} 
+        isWidgetGalleryOpen={isWidgetGalleryOpen} 
+        setIsWidgetGalleryOpen={setIsWidgetGalleryOpen}
+        searchQuery={searchQuery}
+      />;
     }
   };
 
@@ -139,16 +170,28 @@ export default function Home() {
         onSelectProject={setActiveProject}
       />
       <div className="flex-1 flex flex-col min-w-0">
-        <Header activeSection={activeSection} activeProject={activeProject} />
+        {/* Fixed: Passed required props to Header component */}
+        <Header 
+          activeSection={activeSection} 
+          activeProject={activeProject} 
+          onOpenWidgets={() => setIsWidgetGalleryOpen(true)}
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+          onRefresh={initializeApp}
+        />
         <main className="flex-1 overflow-y-auto p-6 scroll-smooth">
           <div className="max-w-[1600px] mx-auto space-y-8">
-            {connectionStatus === 'offline' && (
-              <div className="bg-amber-500/10 border border-amber-500/20 p-4 rounded-2xl flex items-center justify-between animate-in slide-in-from-top-4">
-                <div className="flex items-center gap-3 text-amber-500">
-                  <DatabaseZap size={20} />
-                  <span className="text-sm font-medium">Server Offline: Using Secured Local Workspace (IndexedDB)</span>
+            {(connectionStatus === 'offline' || syncMessage) && (
+              <div className={`p-4 rounded-2xl flex items-center justify-between animate-in slide-in-from-top-4 ${syncMessage ? 'bg-blue-600/10 border border-blue-500/20' : 'bg-amber-500/10 border border-amber-500/20'}`}>
+                <div className="flex items-center gap-3">
+                  {syncMessage ? <Wifi size={20} className="text-blue-500" /> : <WifiOff size={20} className="text-amber-500" />}
+                  <span className={`text-sm font-medium ${syncMessage ? 'text-blue-500' : 'text-amber-500'}`}>
+                    {syncMessage || "Server Offline: Data will be synced automatically when connection returns."}
+                  </span>
                 </div>
-                <button onClick={initializeApp} className="text-xs font-bold text-amber-500 hover:underline uppercase tracking-widest">Retry Cloud Sync</button>
+                <button onClick={initializeApp} className={`text-xs font-bold uppercase tracking-widest hover:underline ${syncMessage ? 'text-blue-500' : 'text-amber-500'}`}>
+                  {syncMessage ? "Dismiss" : "Check Connection"}
+                </button>
               </div>
             )}
             {renderContent()}

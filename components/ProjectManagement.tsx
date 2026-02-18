@@ -1,7 +1,9 @@
 
+"use client";
+
 import React, { useState } from 'react';
 import { Project } from '../types';
-import { Plus, FolderKanban, Calendar, Trash2, Edit2, Loader2, Check, X, ShieldAlert } from 'lucide-react';
+import { Plus, FolderKanban, Calendar, Trash2, Edit2, Loader2, Check, X, ShieldAlert, Link as LinkIcon, Clock } from 'lucide-react';
 import { api } from '../services/apiService';
 
 interface ProjectManagementProps {
@@ -15,6 +17,7 @@ const ProjectManagement: React.FC<ProjectManagementProps> = ({ projects, onAddPr
   const [editingProject, setEditingProject] = useState<Project | null>(null);
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
+  const [spreadsheetUrl, setSpreadsheetUrl] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -23,17 +26,16 @@ const ProjectManagement: React.FC<ProjectManagementProps> = ({ projects, onAddPr
     
     try {
       if (editingProject) {
-        await api.updateProject(editingProject.id, { name, description });
+        await api.updateProject(editingProject.id, { name, description, spreadsheetUrl });
         if (onRefresh) onRefresh();
       } else {
         const newProject: Project = {
           id: `proj-${Math.random().toString(36).substr(2, 9)}`,
           name,
           description,
+          spreadsheetUrl,
           createdAt: new Date().toISOString().split('T')[0]
         };
-        // The parent onAddProject handles the api.saveProject call and refreshing state.
-        // We do NOT call api.saveProject here to avoid double-insertion.
         onAddProject(newProject);
       }
       resetForm();
@@ -49,12 +51,14 @@ const ProjectManagement: React.FC<ProjectManagementProps> = ({ projects, onAddPr
     setEditingProject(null);
     setName('');
     setDescription('');
+    setSpreadsheetUrl('');
   };
 
   const handleEdit = (p: Project) => {
     setEditingProject(p);
     setName(p.name);
     setDescription(p.description);
+    setSpreadsheetUrl(p.spreadsheetUrl || '');
     setIsAdding(true);
   };
 
@@ -79,7 +83,7 @@ const ProjectManagement: React.FC<ProjectManagementProps> = ({ projects, onAddPr
             <FolderKanban className="text-blue-500" size={32} />
             Project Architecture
           </h2>
-          <p className="text-slate-400 mt-1">Isolate metrics and teams across multiple workspace environments.</p>
+          <p className="text-slate-400 mt-1">Manage isolated workspaces and automated sync endpoints.</p>
         </div>
         {!isAdding && (
           <button 
@@ -94,7 +98,7 @@ const ProjectManagement: React.FC<ProjectManagementProps> = ({ projects, onAddPr
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {isAdding && (
-          <div className="bg-[#1e293b] border-2 border-blue-500/50 rounded-3xl p-6 shadow-2xl animate-in fade-in zoom-in duration-300">
+          <div className="bg-[#1e293b] border-2 border-blue-500/50 rounded-3xl p-6 shadow-2xl animate-in fade-in zoom-in duration-300 col-span-1 md:col-span-2 lg:col-span-1">
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="flex justify-between items-center mb-2">
                 <span className="text-[10px] font-bold text-blue-400 uppercase tracking-widest">
@@ -111,14 +115,23 @@ const ProjectManagement: React.FC<ProjectManagementProps> = ({ projects, onAddPr
                 onChange={(e) => setName(e.target.value)}
                 className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-sm focus:ring-1 focus:ring-blue-500 outline-none text-white"
                 required
-                autoFocus
               />
               <textarea 
                 placeholder="Description / Purpose"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-sm focus:ring-1 focus:ring-blue-500 outline-none h-24 resize-none text-white"
+                className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-sm focus:ring-1 focus:ring-blue-500 outline-none h-20 resize-none text-white"
               />
+              <div className="relative">
+                <LinkIcon size={14} className="absolute left-3 top-3.5 text-slate-500" />
+                <input 
+                  type="url" 
+                  placeholder="Master Spreadsheet CSV URL (for Cron)"
+                  value={spreadsheetUrl}
+                  onChange={(e) => setSpreadsheetUrl(e.target.value)}
+                  className="w-full bg-slate-900 border border-slate-700 rounded-xl py-3 pl-10 pr-4 text-xs focus:ring-1 focus:ring-blue-500 outline-none text-white font-mono"
+                />
+              </div>
               <button 
                 type="submit"
                 disabled={loading}
@@ -155,27 +168,27 @@ const ProjectManagement: React.FC<ProjectManagementProps> = ({ projects, onAddPr
             <h3 className="text-xl font-bold mb-1">{project.name}</h3>
             <p className="text-slate-400 text-sm line-clamp-2 min-h-[40px]">{project.description}</p>
             
+            <div className="mt-4 space-y-2">
+              {project.spreadsheetUrl ? (
+                <div className="flex items-center gap-2 text-[10px] text-emerald-500 font-bold bg-emerald-500/10 px-3 py-1.5 rounded-lg border border-emerald-500/20">
+                  <Clock size={12} /> Sync Active: Twice Daily
+                </div>
+              ) : (
+                <div className="flex items-center gap-2 text-[10px] text-slate-500 font-bold bg-slate-900 px-3 py-1.5 rounded-lg border border-slate-800">
+                  <X size={12} /> No Automated Sync
+                </div>
+              )}
+            </div>
+
             <div className="mt-6 pt-6 border-t border-slate-800 flex items-center justify-between">
               <div className="flex items-center gap-2 text-[10px] text-slate-500 font-bold uppercase">
                 <Calendar size={12} />
-                Launched: {project.createdAt}
+                {project.createdAt}
               </div>
-              <span className="text-[10px] bg-slate-800 text-slate-500 px-2 py-0.5 rounded border border-slate-700">ID: {project.id.split('-')[1]}</span>
+              <span className="text-[10px] bg-slate-800 text-slate-500 px-2 py-0.5 rounded border border-slate-700 uppercase">ID: {project.id.split('-')[1]}</span>
             </div>
           </div>
         ))}
-      </div>
-
-      <div className="mt-12 bg-blue-600/5 border border-blue-500/20 rounded-3xl p-8 flex flex-col md:flex-row items-center gap-6">
-        <div className="w-16 h-16 bg-blue-500/10 text-blue-500 rounded-2xl flex items-center justify-center shrink-0 border border-blue-500/20">
-          <ShieldAlert size={32} />
-        </div>
-        <div>
-          <h4 className="text-lg font-bold text-blue-400">Environment Isolation Protocol</h4>
-          <p className="text-slate-400 text-sm max-w-2xl mt-1">
-            Data separation ensures that different clients, business units, or campaigns maintain strictly isolated data silos. Permissions are enforced at the API gateway level for all relational and document stores.
-          </p>
-        </div>
       </div>
     </div>
   );

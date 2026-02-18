@@ -21,7 +21,7 @@ async function connectDB() {
   try {
     const client = new MongoClient(uri);
     await client.connect();
-    db = client.db('Content_pro');
+    db = client.db('omnicontent_pro');
     console.log("Connected to MongoDB Atlas");
   } catch (error) {
     console.error("MongoDB connection error:", error);

@@ -1,0 +1,25 @@
+"use strict";
+/*
+ * ATTENTION: An "eval-source-map" devtool has been used.
+ * This devtool is neither made for production nor for readable output files.
+ * It uses "eval()" calls to create a separate source file with attached SourceMaps in the browser devtools.
+ * If you are trying to read the output file, select a different devtool (https://webpack.js.org/configuration/devtool/)
+ * or disable the default devtool with "devtool: false".
+ * If you are looking for production-ready output files, see mode: "production" (https://webpack.js.org/configuration/mode/).
+ */
+exports.id = "vendor-chunks/is-network-error";
+exports.ids = ["vendor-chunks/is-network-error"];
+exports.modules = {
+
+/***/ "(rsc)/./node_modules/is-network-error/index.js":
+/*!************************************************!*\
+  !*** ./node_modules/is-network-error/index.js ***!
+  \************************************************/
+/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
+
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpack_require__.d(__webpack_exports__, {\n/* harmony export */   \"default\": () => (/* binding */ isNetworkError)\n/* harmony export */ });\nconst objectToString = Object.prototype.toString;\n\nconst isError = value => objectToString.call(value) === '[object Error]';\n\nconst errorMessages = new Set([\n\t'network error', // Chrome\n\t'Failed to fetch', // Chrome\n\t'NetworkError when attempting to fetch resource.', // Firefox\n\t'The Internet connection appears to be offline.', // Safari 16\n\t'Network request failed', // `cross-fetch`\n\t'fetch failed', // Undici (Node.js)\n\t'terminated', // Undici (Node.js)\n\t' A network error occurred.', // Bun (WebKit)\n\t'Network connection lost', // Cloudflare Workers (fetch)\n]);\n\nfunction isNetworkError(error) {\n\tconst isValid = error\n\t\t&& isError(error)\n\t\t&& error.name === 'TypeError'\n\t\t&& typeof error.message === 'string';\n\n\tif (!isValid) {\n\t\treturn false;\n\t}\n\n\tconst {message, stack} = error;\n\n\t// Safari 17+ has generic message but no stack for network errors\n\tif (message === 'Load failed') {\n\t\treturn stack === undefined\n\t\t\t// Sentry adds its own stack trace to the fetch error, so also check for that\n\t\t\t|| '__sentry_captured__' in error;\n\t}\n\n\t// Deno network errors start with specific text\n\tif (message.startsWith('error sending request for url')) {\n\t\treturn true;\n\t}\n\n\t// Standard network error messages\n\treturn errorMessages.has(message);\n}\n//# sourceURL=[module]\n//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiKHJzYykvLi9ub2RlX21vZHVsZXMvaXMtbmV0d29yay1lcnJvci9pbmRleC5qcyIsIm1hcHBpbmdzIjoiOzs7O0FBQUE7O0FBRUE7O0FBRUE7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTs7QUFFZTtBQUNmO0FBQ0E7QUFDQTtBQUNBOztBQUVBO0FBQ0E7QUFDQTs7QUFFQSxRQUFRLGdCQUFnQjs7QUFFeEI7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBOztBQUVBO0FBQ0E7QUFDQTtBQUNBOztBQUVBO0FBQ0E7QUFDQSIsInNvdXJjZXMiOlsiL1VzZXJzL2FuaW1lc2hwYXRoYWsvRFJlbEJpdC9ub2RlX21vZHVsZXMvaXMtbmV0d29yay1lcnJvci9pbmRleC5qcyJdLCJzb3VyY2VzQ29udGVudCI6WyJjb25zdCBvYmplY3RUb1N0cmluZyA9IE9iamVjdC5wcm90b3R5cGUudG9TdHJpbmc7XG5cbmNvbnN0IGlzRXJyb3IgPSB2YWx1ZSA9PiBvYmplY3RUb1N0cmluZy5jYWxsKHZhbHVlKSA9PT0gJ1tvYmplY3QgRXJyb3JdJztcblxuY29uc3QgZXJyb3JNZXNzYWdlcyA9IG5ldyBTZXQoW1xuXHQnbmV0d29yayBlcnJvcicsIC8vIENocm9tZVxuXHQnRmFpbGVkIHRvIGZldGNoJywgLy8gQ2hyb21lXG5cdCdOZXR3b3JrRXJyb3Igd2hlbiBhdHRlbXB0aW5nIHRvIGZldGNoIHJlc291cmNlLicsIC8vIEZpcmVmb3hcblx0J1RoZSBJbnRlcm5ldCBjb25uZWN0aW9uIGFwcGVhcnMgdG8gYmUgb2ZmbGluZS4nLCAvLyBTYWZhcmkgMTZcblx0J05ldHdvcmsgcmVxdWVzdCBmYWlsZWQnLCAvLyBgY3Jvc3MtZmV0Y2hgXG5cdCdmZXRjaCBmYWlsZWQnLCAvLyBVbmRpY2kgKE5vZGUuanMpXG5cdCd0ZXJtaW5hdGVkJywgLy8gVW5kaWNpIChOb2RlLmpzKVxuXHQnIEEgbmV0d29yayBlcnJvciBvY2N1cnJlZC4nLCAvLyBCdW4gKFdlYktpdClcblx0J05ldHdvcmsgY29ubmVjdGlvbiBsb3N0JywgLy8gQ2xvdWRmbGFyZSBXb3JrZXJzIChmZXRjaClcbl0pO1xuXG5leHBvcnQgZGVmYXVsdCBmdW5jdGlvbiBpc05ldHdvcmtFcnJvcihlcnJvcikge1xuXHRjb25zdCBpc1ZhbGlkID0gZXJyb3Jcblx0XHQmJiBpc0Vycm9yKGVycm9yKVxuXHRcdCYmIGVycm9yLm5hbWUgPT09ICdUeXBlRXJyb3InXG5cdFx0JiYgdHlwZW9mIGVycm9yLm1lc3NhZ2UgPT09ICdzdHJpbmcnO1xuXG5cdGlmICghaXNWYWxpZCkge1xuXHRcdHJldHVybiBmYWxzZTtcblx0fVxuXG5cdGNvbnN0IHttZXNzYWdlLCBzdGFja30gPSBlcnJvcjtcblxuXHQvLyBTYWZhcmkgMTcrIGhhcyBnZW5lcmljIG1lc3NhZ2UgYnV0IG5vIHN0YWNrIGZvciBuZXR3b3JrIGVycm9yc1xuXHRpZiAobWVzc2FnZSA9PT0gJ0xvYWQgZmFpbGVkJykge1xuXHRcdHJldHVybiBzdGFjayA9PT0gdW5kZWZpbmVkXG5cdFx0XHQvLyBTZW50cnkgYWRkcyBpdHMgb3duIHN0YWNrIHRyYWNlIHRvIHRoZSBmZXRjaCBlcnJvciwgc28gYWxzbyBjaGVjayBmb3IgdGhhdFxuXHRcdFx0fHwgJ19fc2VudHJ5X2NhcHR1cmVkX18nIGluIGVycm9yO1xuXHR9XG5cblx0Ly8gRGVubyBuZXR3b3JrIGVycm9ycyBzdGFydCB3aXRoIHNwZWNpZmljIHRleHRcblx0aWYgKG1lc3NhZ2Uuc3RhcnRzV2l0aCgnZXJyb3Igc2VuZGluZyByZXF1ZXN0IGZvciB1cmwnKSkge1xuXHRcdHJldHVybiB0cnVlO1xuXHR9XG5cblx0Ly8gU3RhbmRhcmQgbmV0d29yayBlcnJvciBtZXNzYWdlc1xuXHRyZXR1cm4gZXJyb3JNZXNzYWdlcy5oYXMobWVzc2FnZSk7XG59XG4iXSwibmFtZXMiOltdLCJpZ25vcmVMaXN0IjpbMF0sInNvdXJjZVJvb3QiOiIifQ==\n//# sourceURL=webpack-internal:///(rsc)/./node_modules/is-network-error/index.js\n");
+
+/***/ })
+
+};
+;

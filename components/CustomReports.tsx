@@ -63,7 +63,7 @@ const CustomReports: React.FC<CustomReportsProps> = ({ project }) => {
   const handleUploadData = async () => {
     if (!file || !project || !selectedReport) return;
     setImporting(true);
-    showToast("Mapping spreadsheet headers...", "loading");
+    showToast("Normalizing unique URLs...", "loading");
 
     try {
       const data = await file.arrayBuffer();
@@ -72,7 +72,10 @@ const CustomReports: React.FC<CustomReportsProps> = ({ project }) => {
       const worksheet = workbook.Sheets[firstSheetName];
       const jsonData = XLSX.utils.sheet_to_json(worksheet) as any[];
 
-      const contentItems: ContentItem[] = jsonData.map((row, idx) => {
+      // Deduplicate locally first based on URL (description)
+      const uniqueItemsMap = new Map<string, ContentItem>();
+
+      jsonData.forEach((row, idx) => {
         const findVal = (keys: string[]) => {
           const key = Object.keys(row).find(k => {
             const clean = k.toLowerCase().replace(/[^a-z0-9]/g, '');
@@ -87,22 +90,29 @@ const CustomReports: React.FC<CustomReportsProps> = ({ project }) => {
           return isNaN(n) ? 0 : n;
         };
 
-        return {
+        const desc = findVal(['page', 'url', 'description', 'title']) || `Untitled-${idx}`;
+        
+        const item: ContentItem = {
           id: `rep-import-${Date.now()}-${idx}`,
           projectId: project.id,
           date: findVal(['date', 'timestamp', 'day']) || new Date().toISOString().split('T')[0],
           platform: 'SEO',
           type: findVal(['type', 'format']) || 'Imported Content',
           author: findVal(['author', 'owner']) || 'System',
-          description: findVal(['page', 'url', 'description', 'title']) || 'Untitled Page',
+          description: desc,
           impressions: Math.abs(parseNum(findVal(['impressions', 'reach', 'impressionschange']))),
           views: Math.abs(parseNum(findVal(['views', 'clicks', 'clickschange']))),
           engagement: Math.abs(parseNum(findVal(['engagement', 'ctr', 'ctrchange', 'tracked'])))
         };
+
+        // Always use the latest entry in the sheet for a specific URL
+        uniqueItemsMap.set(desc, item);
       });
 
-      await api.uploadContent(contentItems);
-      showToast(`Imported ${contentItems.length} SEO records.`, "success");
+      const finalItems = Array.from(uniqueItemsMap.values());
+
+      await api.uploadContent(finalItems);
+      showToast(`Sync complete: ${finalItems.length} unique URLs updated.`, "success");
       setIsImportModalOpen(false);
       load();
       window.dispatchEvent(new CustomEvent('data-updated'));
@@ -160,7 +170,7 @@ const CustomReports: React.FC<CustomReportsProps> = ({ project }) => {
       <div className="flex justify-between items-center">
         <div>
           <h2 className="text-3xl font-bold">Performance Hub</h2>
-          <p className="text-slate-400">Map and ingest search data into your dashboard.</p>
+          <p className="text-slate-400">Map and ingest unique search data into your dashboard.</p>
         </div>
         <button onClick={() => setIsModalOpen(true)} className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-2xl font-bold flex items-center gap-2">
           <Plus size={18} /> New Blueprint
@@ -207,7 +217,7 @@ const CustomReports: React.FC<CustomReportsProps> = ({ project }) => {
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-6">
           <div className="bg-[#1e293b] border border-slate-700 w-full max-w-xl rounded-3xl p-8">
             <h3 className="text-lg font-bold mb-2">Upload Data: {selectedReport?.title}</h3>
-            <p className="text-sm text-slate-400 mb-8">Headers like "Clicks - Change" will be mapped automatically.</p>
+            <p className="text-sm text-slate-400 mb-8">Duplicates will be overwritten. We only track unique URLs.</p>
             <div onClick={() => fileInputRef.current?.click()} className="border-2 border-dashed border-slate-800 rounded-3xl p-12 text-center cursor-pointer hover:bg-slate-900/50 transition-all">
               <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" accept=".csv,.xlsx" />
               <FileUp size={48} className="mx-auto text-blue-500 mb-4" />
